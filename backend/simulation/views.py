@@ -44,14 +44,7 @@ def start_simulation(request):
 @has_started
 def step_simulation(request):
     runner.step()
-    return Response({"turn": runner.turn})
-
-
-@api_view(['GET'])
-@has_started
-def get_state(request):
     return Response(runner.get_state())
-
 
 @api_view(['POST'])
 def reset_simulation(request):
@@ -67,10 +60,14 @@ def create_grid(request):
     if has_started_flag:
         return Response({"error": "Simulation has already been started."})
 
-    robot_count = int(request.data.get("robots", 5))
-    trash_count = int(request.data.get("trash", 50))
+    robot_count = int(request.GET.get("robots", 5))
+    trash_count = int(request.GET.get("trash", 50))
     runner = Runner(robot_count, trash_count)
+    return Response(runner.get_grid())
 
-    return Response({"status": "created with {} robots and {} trash".format(robot_count, trash_count)})
-
-
+@api_view(['GET'])
+def get_visibility(request):
+    global runner
+    if runner is None:
+        return Response({"error": "Grid has not been created."})
+    return Response(runner.get_visibility())
