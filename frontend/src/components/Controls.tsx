@@ -1,5 +1,3 @@
-// src/components/Controls.tsx
-
 interface Props {
     simulationStarted: boolean;
     onStart: () => void;

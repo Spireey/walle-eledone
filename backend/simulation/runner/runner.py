@@ -6,8 +6,8 @@ class Runner:
         self.grid = Grid()
         self.memory = []
         self.robots = []
-        self.emptied = []
         self.turn = 0
+        self.score = 0
 
         for i in range(robot_count):
             x, y = self.grid.get_random_empty_cell()
@@ -28,7 +28,6 @@ class Runner:
                             self.memory.append((x, y))
 
     def step(self):
-        self.emptied.clear()
         for robot in self.robots:
             robot.act(self, self.grid, self.memory)
         self.turn += 1
@@ -37,8 +36,9 @@ class Runner:
         return {
             "turn": self.turn,
             "robots": [{"id": r.id, "x": r.x, "y": r.y, "carrying": r.carrying, "objective": r.objective} for r in self.robots],
-            "emptied": self.emptied,
+            "grid": self.get_grid()["grid"],
             "memory": self.memory,
+            "score": self.score,
         }
 
     def get_grid(self):

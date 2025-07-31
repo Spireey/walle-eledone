@@ -7,14 +7,22 @@ class Robot:
         self.y = y
         self.carrying = False
         self.objective = None
+        self.idle = 0
 
     def act(self, runner, grid, memory):
         cell = grid.cells[self.x][self.y]
 
+        # If idle for 4 turns, random move
+        if self.idle == 4:
+            self.idle = 0
+            return self.random_move(runner, grid, memory)
+
         # Drop if holding in base
         if self.carrying and (self.x, self.y) == grid.base:
             self.carrying = False
-            return "drop"
+            runner.score += 1
+            self.idle += 1
+            return "idle"
 
         # Returning to base if holding trash
         if self.carrying:
@@ -29,8 +37,8 @@ class Robot:
             cell.has_trash = False
             self.carrying = True
             self.objective = None
-            runner.emptied.append((self.x, self.y))
-            return "pick-up"
+            self.idle += 1
+            return "idle"
 
         # Choose the next trash as objective
         if len(memory) != 0:
@@ -61,9 +69,6 @@ class Robot:
         nx, ny = self.x + direction[0], self.y + direction[1]
         if grid.in_bounds(nx, ny) and not grid.cells[nx][ny].robot_id:
             grid.cells[self.x][self.y].robot_id = None
-            if not grid.cells[self.x][self.y].has_trash:
-                runner.emptied.append((self.x, self.y))
-
             self.x, self.y = nx, ny
             grid.cells[self.x][self.y].robot_id = self.id
 
@@ -84,7 +89,8 @@ class Robot:
                     if grid.cells[x][y].has_trash:
                         memory.append((x, y))
             return "move"
-        return "wait"
+        self.idle += 1
+        return "idle"
 
     def random_move(self, runner, grid, memory):
         directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]
@@ -92,7 +98,8 @@ class Robot:
         for dx, dy in directions:
             if self.move(runner, grid, memory, (dx, dy)) == "move":
                 return "move"
-        return "wait"
+        self.idle += 1
+        return "idle"
 
     def goto_objective(self, runner, grid, memory):
         x, y = self.objective
@@ -103,4 +110,5 @@ class Robot:
             direction = (0, 1 if self.y < y else -1)
             return self.move(runner, grid, memory, direction)
         self.objective = None
-        return "wait"
+        self.idle += 1
+        return "idle"

@@ -9,6 +9,7 @@ function App() {
     const [robots, setRobots] = useState(3);
     const [trash, setTrash] = useState(10);
     const [hasStarted, setHasStarted] = useState(false);
+    const [score, setScore] = useState(0);
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
     const handleCreateGrid = async () => {
@@ -38,22 +39,10 @@ function App() {
         if (hasStarted) {
             intervalRef.current = setInterval(async () => {
                 try {
+                    if (score === trash) setHasStarted(false);
                     const res = await axios.post("http://localhost:8000/step_simulation");
-                    setGrid(prevGrid => {
-                        const newGrid = prevGrid.map(row => [...row]);
-                        for (const empty of res.data.emptied) {
-                            if (empty[1] === 0 && empty[0] === 0) continue;
-                            newGrid[empty[1]][empty[0]] = "empty";
-                        }
-                        for (const robot of res.data.robots) {
-                            if (robot.x === 0 && robot.y === 0) continue;
-                            newGrid[robot.y][robot.x] = "robot";
-                        }
-                        for (const trash of res.data.memory) {
-                            newGrid[trash[1]][trash[0]] = "trash";
-                        }
-                        return newGrid;
-                    })
+                    setScore(res.data.score);
+                    setGrid(res.data.grid);
                 } catch (error) {
                     console.error("Erreur pendant la simulation :", error);
                 }
@@ -62,7 +51,7 @@ function App() {
         return () => {
             if (intervalRef.current) clearInterval(intervalRef.current);
         };
-    }, [hasStarted]);
+    }, [hasStarted, score, trash]);
 
 
         return (
@@ -109,6 +98,9 @@ function App() {
                         >
                             Réinitialiser
                         </button>
+                        <h1 className="font-bold text-3xl">
+                            Score : {score}/{trash}
+                        </h1>
                     </div>
                 )}
             </div>
