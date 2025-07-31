@@ -22,7 +22,7 @@ class Runner:
             for dx in range(-5, 6):
                 for dy in range(-5, 6):
                     x, y = robot.x + dx, robot.y + dy
-                    if self.grid.in_bounds(x,y) and not self.grid.cells[x][y].explored:
+                    if self.grid.in_bounds(x,y):
                         self.grid.cells[x][y].explored = True
                         if self.grid.cells[x][y].has_trash:
                             self.memory.append((x, y))

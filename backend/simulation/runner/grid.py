@@ -18,5 +18,5 @@ class Grid:
     def get_random_empty_cell(self):
         while True:
             x, y = random.randint(0, self.size - 1), random.randint(0, self.size - 1)
-            if (x, y) != self.base and not self.cells[x][y].has_trash:
+            if (x, y) != self.base and not self.cells[x][y].has_trash and self.cells[x][y].robot_id is None:
                 return x, y

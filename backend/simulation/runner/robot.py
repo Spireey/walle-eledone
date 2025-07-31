@@ -29,7 +29,7 @@ class Robot:
             return self.return_to_base(runner, grid, memory)
 
         # Go to next trash
-        if self.objective:
+        if not self.carrying and self.objective:
             return self.goto_objective(runner, grid, memory)
 
         # Pick up trash
@@ -72,22 +72,12 @@ class Robot:
             self.x, self.y = nx, ny
             grid.cells[self.x][self.y].robot_id = self.id
 
-            # Now that we moved, creating a list of new tiles to scout
-            to_scout = []
-            if direction == (-1, 0): # Left
-                to_scout = [(nx - 5, ny + dy) for dy in range(-5, 6)]
-            elif direction == (1, 0):
-                to_scout = [(nx + 5, ny + dy) for dy in range(-5, 6)]
-            elif direction == (0, -1):
-                to_scout = [(nx + dx, ny - 5) for dx in range(-5, 6)]
-            elif direction == (0, 1):
-                to_scout = [(nx + dx, ny + 5) for dx in range(-5, 6)]
-
-            for x, y in to_scout:
-                if grid.in_bounds(x,y) and not grid.cells[x][y].explored:
-                    grid.cells[x][y].explored = True
-                    if grid.cells[x][y].has_trash:
+            for dx in range(-5, 6):
+                for dy in range(-5, 6):
+                    x, y = self.x + dx, self.y + dy
+                    if grid.in_bounds(x, y) and grid.cells[x][y].has_trash and (x,y) not in memory:
                         memory.append((x, y))
+                        grid.cells[x][y].explored = True
             return "move"
         self.idle += 1
         return "idle"

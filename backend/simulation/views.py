@@ -37,7 +37,8 @@ def start_simulation(request):
             status=status.HTTP_400_BAD_REQUEST
         )
     has_started_flag = True
-    return Response({"status": "started"})
+    return Response({"status": "started",
+                     "memory" : runner.memory})
 
 
 @api_view(['POST'])
